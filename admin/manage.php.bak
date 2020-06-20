@@ -1,0 +1,497 @@
+<?php
+/* <one line to give the program's name and a brief idea of what it does.>
+ * Copyright (C) <year>  <name of author>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/**
+ * \file    admin/setup.php
+ * \ingroup mymodule
+ * \brief   Example module setup page.
+ *
+ * Put detailed description here.
+ */
+
+// Load Dolibarr environment
+if (false === (@include '../../main.inc.php')) {  // From htdocs directory
+	require '../../../main.inc.php'; // From "custom" directory
+}
+
+global $langs, $user;
+
+
+// Libraries
+require_once DOL_DOCUMENT_ROOT . "/core/lib/admin.lib.php";
+require_once '../lib/mymodule.lib.php';
+require_once '../lib/fonoapi.lib.php';
+require_once "../class/productphone.class.php";
+// Translations
+$langs->load("productphone@productphone");
+
+// Access control SI UTILISATEUR N'EST PAS ADMIN, ALORS NE PAS AUTORISER L'ACCES
+if (!$user->admin) {
+	accessforbidden();
+}
+
+//var_dump($t_feed_product_phone);
+// Parameters
+$p_fk_product_phone = GETPOST('fk_product_phone');
+$p_brand = GETPOST('brand');
+$p_device = GETPOST('device');
+$p_productphone = GETPOST('productphone');
+$p_product = GETPOST('product');
+$p_action = GETPOST('action');
+$p_search = GETPOST('search');
+$p_label = GETPOST('select');
+
+/**
+ * Actions
+ */
+//RECHERCHE UNIQUE
+switch ($p_action) {
+	case 'search_product_all':
+		$p_productphone = $p_product;
+		break;
+	case 'search_productphone_all':
+		$p_product = $p_productphone;
+		break;
+}
+
+
+if ($p_product) {
+//    echo 'lecture du controler RECHERCHE UNIQUE VODA';
+	$_productPhone = new ProductPhone($db);
+	$t_search_product = $_productPhone->search_product($p_product);
+	if (empty($t_search_product)) {
+        //Message d'erreur
+	} else {
+		foreach ($t_search_product as $resulta) {
+			$t_list_product[] = $resulta;
+		}
+	}
+}
+if ($p_productphone) {
+//    echo 'lecture du controler RECHERCHE UNIQUE RAW';
+	$_productPhone = new ProductPhone($db);
+	$t_search_raw = $_productPhone->search_product_phone_raw($p_productphone);
+	if (isset($t_search_raw)) {
+
+		foreach ($t_search_raw as $obj) {
+			$t_list_raw[] = $obj;
+		}
+	}
+}
+
+/*================= TEST TEMPORAIRE ===========*/
+//$_productPhone = new ProductPhone($db);
+//$test = $_productPhone->feed_productPhone('apple','iphone');
+/*=============================================*/
+
+/**
+ * View
+ */
+$page_name = 'ManagementCards';
+llxHeader('', $langs->trans($page_name), '', '', '', 0, 0, '', array('/productphone/css/mycss.css.php'));
+
+// Subheader
+$linkback = '<a href="' . DOL_URL_ROOT . '/admin/modules.php">'
+	. $langs->trans("BackToModuleList") . '</a>';
+print load_fiche_titre($langs->trans($page_name), $linkback);
+
+// Configuration header
+$head = productPhoneAdminPrepareHead();
+dol_fiche_head(
+	$head,
+	'correspondance',
+	$langs->trans("Module750504Name"),
+	1,
+	'productphone@productphone'
+);
+//Style de présentation - fond bleue clair
+print '<div class="fiche">';
+print '<div class="tabBar">';
+print '<div class="fichecenter">';
+// ---------------------------------------
+//AFFICHAGE GAUCHE PAGE
+print '<div class="fichehalfleft">';
+print '<form action="' . dol_buildpath('/productphone/admin/manage.php', 1) . '?action=rechercher_grouper&brand_raw="' . $p_productphone . '" method="get">';
+print 'Marque : <input type="text" name="productphone" value="' . $p_productphone . '"/>';
+print '<input type="hidden" name="product" value="' . $p_product . '"/>';
+//RECHERCHE UNIQUE
+print '<button type="submit" name="action" value="search_productphone">rechercher</button>';
+//RECHERCHE GROUPER
+print '<button type="submit" name="action" value="search_productphone_all">rechercher t</button> ';
+print '</form>';
+print '<br>';
+
+print '<table class="noborder">';
+print '<thead>';
+print '<tr class="liste_titre"><th width="16.6%" >Marque</th><th width="16.6%">Nom d\'appareil</th>
+                <th width="16.6%">Status</th><th width="16.6%">Système d\exploitation</th><th width="16.6%">Dimensions</th><th>Action</th></tr>';
+print '</thead>';
+print '</table>';
+
+print '<div style="overflow:scroll; height:550px; background-color: white;">';
+print '<table class="noborder" id="table_productphone_raw">';
+print '<tbody>';
+$parity = true;
+$product = trim($p_product);
+if ($t_list_raw) {
+	foreach ($t_list_raw as $liste) {
+
+		$parity = !$parity;
+		print '<tr class="' . ($parity ? 'pair' : 'impair') . '" data-rowid="' . $liste['rowid'] . '">';
+		print '<td width="16.6%">' . $liste['Brand'] . '</td>';
+                //-----------------------------------------
+		print '<td width="16.6%">' . $liste['DeviceName'] . '</td>';
+                //-----------------------------------------
+		print '<td width="16.6%">' . $liste['status'] . '</td>';
+                //-----------------------------------------
+		print '<td width="16.6%">' . $liste['os'] . '</td>';
+                //-----------------------------------------
+		print '<td width="16.6%">' . $liste['dimensions'] . '</td>';
+                //-----------------------------------------
+		print '<td width="16.6%"><a href="../fiche.php?id=' . $liste['fk_product_phone_raw'] . '&device=' . $p_productphone . '&action=' . $p_action . '&product=' . $product . '">détail</a></td>';
+		print '</tr>';
+	}
+}
+print '</tbody>';
+print '</table>';
+print '</div>';
+
+//Affichage Tableaux LLX_PRODUCTPHONE -- BAS-GAUCHE
+print '<table class="noborder" >';
+print '<thead>';
+print '<tr class="liste_titre"><th width="34%">Référence</th><th width="34%">Libellé</th></tr>';
+print '</thead>';
+print '</table>';
+
+print '<div style="overflow:scroll; height:275px; background-color: white;">';
+print '<table id="table_productphone_product">';
+print '<tbody>';
+
+print '</tbody>';
+print '</table>';
+print '</div>';
+print '<button id="unset_all">>></button>';
+print '</div>';
+//-----------------------------------------------------------------------------------------------------
+//SECTION DROITE PAGE
+//-----------------------------------------------------------------------------------------------------
+print '<div class="fichehalfright">';
+//AJOUTE UN ESPACE SUR LA GAUCHE DU TABLEAU DE DROITE
+//print '<div class="ficheaddleft">';
+print '<form action="' . dol_buildpath('/productphone/admin/manage.php', 1) . '?action=rechercher_grouper&brand_product="' . $p_product . '" method="get">';
+//-----------------------------------------------------------------------------------------------------
+// INPUT BRAND
+//-----------------------------------------------------------------------------------------------------
+print 'Marque : <input type="text" name="product" value="' . $p_product . '"/>';
+print '<input type="hidden" name="productphone" value="' . $p_productphone . '"/>';
+
+//RECHERCHE UNIQUE
+print '<button type="submit" name="action" value="search_product">Recherche</button>';
+
+//RECHERCHE GROUPER
+print '<button type="submit" name="action" value="search_product_all">Recherche T</button>';
+print '</form>';
+print '<br>';
+print '<table  class="noborder" >';
+print '<thead>';
+print '<tr class="liste_titre tr_product"><th width="50%">Référence</th><th width="50%">Libellé</th></tr>';
+print '</thead>';
+print '</table>';
+print '<div style="overflow:scroll; height:850px; background-color: white;">';
+print '<table id="table_product">';
+print '<tbody>';
+    // AFFICHAGE LLX_PRODUCT - DROITE
+if ($t_list_product) {
+	foreach ($t_list_product as $obj) {
+		$parity = !$parity;
+		print '<tr class="' . ($parity ? 'pair' : 'impair') . ' " data-rowid="' . $obj['rowid'] . '">';
+                //-----------------------------------------
+		print '<td width="50%">' . $obj['ref'] . '</td>';
+                //-----------------------------------------
+		print '<td width="50%">' . $obj['label'] . '</td>';
+                //-----------------------------------------
+		print '</tr></div></div></div>';
+	}
+}
+print '</tbody>';
+print '</table>';
+print '</div>';
+print '<button id="set_all"><<</button>';
+    //Div -- "Tabar"
+print '</div>';
+    //Div -- "fiche"
+print '</div>';
+print '<div style="clear:both">';
+dol_fiche_end();
+// Page end
+llxFooter();
+?>
+<!--///////////////////////////////////////////////////////////////////
+//			JQUERRY
+//////////////////////////////////////////////////////////////////-->
+<script>
+    $(document).ready(function(){
+        var fk_product_phone_raw;
+        var fk_products;
+        var phones = {};
+        var phonesid = {};
+        var rowid_productphone_raw;
+        var rowid_prduct;
+        var highlight_product;
+        var idproduct = {};
+        var rowid_productphone_product;
+
+        //LLX_PRODUCT_PHONE_RAW -- tableau HAUT GAUCHE
+        //SELECTIONNE LA LIGNE ET OU AJOUTE "SELECTED" + MET EN SURBRILLANCE
+        $('#table_productphone_raw>tbody>tr').click(function(){
+          if($(this).hasClass('selected')){
+            //Si la classe "selected" existe déja sur le tr, Alors retire la classe selected
+            $('#table_productphone_raw>tbody>tr').removeClass('selected');
+            $(this).removeClass('selected');
+          } else {
+            //Sinon ajouter la classe selected
+            $('#table_productphone_raw>tbody>tr').removeClass('selected');
+            $(this).addClass('selected');
+          }
+
+          //Permet de récupérer l'id de la ligne -- puis stoker dans rowid_productphone_raw
+          rowid_productphone_raw = $('#table_productphone_raw>tbody>tr.selected').data('rowid');
+            select_product_phone(rowid_productphone_raw);
+
+        });
+
+        //LLX_PRODUCT -- tableau DROITE
+        //Set or Unset llx_product
+        $('#table_product>tbody>tr').dblclick(function(){
+           
+            if($(this).hasClass('selected')) {
+
+                $(this).removeClass('selected');
+
+                //Permet de récupérer l'id de la ligne puis stoker dans -- rowid_prduct -- rowid_productphone_raw
+                rowid_prduct = $(this).data('rowid');
+                rowid_productphone_raw = $('#table_productphone_raw>tbody>tr.selected').data('rowid');
+
+                set_or_unset_select_product(rowid_productphone_raw,rowid_prduct);
+            } else {
+
+                if($('#table_productphone_raw>tbody>tr').hasClass('selected')){
+                    //Sinon ajouter la classe add_product
+                    $(this).addClass('selected');
+
+                    //Permet de récupérer l'id de la ligne puis stoker dans -- rowid_prduct -- rowid_productphone_raw
+                    rowid_prduct = $(this).data('rowid');
+                    rowid_productphone_raw = $('#table_productphone_raw>tbody>tr.selected').data('rowid');
+
+                    set_or_unset_select_product(rowid_productphone_raw,rowid_prduct);
+
+
+                }
+
+            }
+        });
+
+        //BOUTTON UNSET ALL
+        $('#unset_all').click(function(){
+            rowid_productphone_raw = $('#table_productphone_raw>tbody>tr.selected').data('rowid');
+            unset_all(rowid_productphone_raw);
+            select_product_phone(rowid_productphone_raw);
+        });
+
+        //BOUTTON SET ALL
+        $('#set_all').click(function(){
+
+            var ids_product = [];
+
+            $('#table_product>tbody>tr').each(function(idx,el){
+                rowid_productphone_raw = $('#table_productphone_raw>tbody>tr.selected').data('rowid');
+                ids_product.push($(el).data('rowid'));
+            });
+
+            set_all(rowid_productphone_raw,JSON.stringify(ids_product));
+            select_product_phone(rowid_productphone_raw);
+        });
+
+        //Uset ligne llx_product_phone_product au double click
+        $('#table_productphone_product>tbody').on('dblclick','tr',function(){
+            unset_productphone_product($('#table_productphone_raw>tbody>tr.selected').data('rowid'),$(this).data('idproduct'));
+        });
+
+
+    });
+
+
+
+    function unset_productphone_product(fk_productphone_raw,fk_products){
+        $.ajax({
+            type:"GET",
+            url: "ajax.php",
+            dataType: "json",
+            data: {
+                'action': 'unset_productphone_product'
+                , 'fk_productphone_raw': fk_productphone_raw
+                ,'fk_product': fk_products},
+                'success': function (data) {
+                    phones = {};
+                    phonesid = {};
+                    $.each(data.data, function (idx, el) {
+                        phones[idx] = el;
+                        phonesid[el.rowid] = idx;
+                    })
+                    select_product_phone(fk_productphone_raw);
+                },
+        });
+    }
+
+    /**
+     * enregistre liste llx_product et ligne llx_product_phone_raw dans llx_product_phone_product
+     * @param fk_product_phone
+     * */
+    function set_all(fk_productphone_raw,fk_products){
+        $.ajax({
+            type:"GET",
+            url: "ajax.php",
+            dataType: "json",
+            data: {
+                'action': 'set_all_product'
+                ,'fk_productphone_raw': fk_productphone_raw
+                ,'fk_products': fk_products}
+                ,'success' : function(data){
+                phones={};
+                phonesid={};
+                $.each(data.data,function(idx,el){
+                    phones[idx]=el;
+                    phonesid[el.rowid]=idx;
+                })
+                select_product_phone(fk_productphone_raw);
+            },
+            'error': function(jqXHR,textStatus,errorThrown){
+                $.jnotify('Une erreur est survenu avec le status suivant : '+errorThrown,'error');
+            }
+        });
+    }
+
+    /**
+     * Supprime tous les fk_product affiché dans llx_product_phone_product
+     * @param fk_product
+     **/
+     function unset_all(fk_productphone_raw){
+        $.ajax({
+            type:"GET",
+            url: "ajax.php",
+            dataType: "json",
+            data: {
+                'action': 'unset_all_product'
+                ,'fk_productphone_raw': fk_productphone_raw}
+                ,'success' : function(data)
+            {
+                phones = {};
+                phonesid = {};
+                $.each(data.data,function(idx,el){
+                    phones[idx]=el;
+                    phonesid[el.rowid]=idx;
+                })
+                select_product_phone(fk_productphone_raw);
+            },
+        });
+    }
+
+    /**
+     * verifie si présence de la ligne selectionner llx_product_phone_raw dans llx_product_phone_product, Utilise la méthode _GET
+     * @param fk_productphone_raw
+     */
+    function select_product_phone(fk_productphone_raw){
+        $.ajax({
+            type:"GET",
+            url: "ajax.php",
+            dataType: "json",
+            data: {
+                'action': 'get_product_from_productphone'
+                ,'fk_productphone_raw': fk_productphone_raw},
+            'success' : function(data){
+                phones={};
+                phonesid={};
+                $.each(data.data,function(idx,el){
+                    phones[idx]=el;
+                    phonesid[el.rowid]=idx;
+                })
+                show_productphone_product(data.data);
+            },
+        });
+    }
+
+    /**
+     * Retours -- Affiche correspondance de la ligne selectionner avec la methode select_product_phone()
+     * @param data
+     */
+    function show_productphone_product(data){
+
+        $('#table_productphone_product>tbody').empty();
+            $.each(data,function(idx,el){
+                $('#table_productphone_product>tbody').append(
+                    '<tr data-idproduct="'+el.fk_product+'">'+
+                        '<td  width="34%">'+el.ref+'</td>' +
+                        '<td  width="34%">'+el.label+'</td>'+
+                    '</tr>'
+                );
+            });
+        highlight_product();
+    }
+
+    /**
+     * Met en surbrillance dans llx_product toutes les correspondance
+     * trouver dans llx_productphone_product
+    **/
+     function highlight_product(){
+        $('#table_product>tbody>tr').removeClass('selected');
+          $('#table_productphone_product>tbody>tr').each(function(idx,el){
+            idproduct = $(el).data('idproduct');
+            tr_product = $('#table_product>tbody>tr[data-rowid='+idproduct+']');
+            tr_product.addClass('selected');
+          });
+     }
+
+
+    /**
+     * Insère ou Supprime fk_product_phone_raw et fk_productd dans llx_product_phone_product
+     * @param id_product
+     */
+    function set_or_unset_select_product(fk_productphone_raw,fk_products){
+        $.ajax({
+            type:"GET",
+            url: "ajax.php",
+            dataType: "json",
+            data: {
+                'action': 'set_or_unset_select_product'
+                ,'fk_productphone_raw': fk_productphone_raw
+                ,'fk_product': fk_products},
+            'success' : function(data){
+                phones={};
+                phonesid={};
+                $.each(data.data,function(idx,el){
+                    phones[idx]=el;
+                    phonesid[el.rowid]=idx;
+                })
+                select_product_phone(fk_productphone_raw);
+            }
+        });
+    }
+
+</script>
+<?php
+

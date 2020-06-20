@@ -1,0 +1,201 @@
+<?php
+/* <one line to give the program's name and a brief idea of what it does.>
+ * Copyright (C) <year>  <name of author>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/**
+ * \file    admin/setup.php
+ * \ingroup mymodule
+ * \brief   Example module setup page.
+ *
+ * Put detailed description here.
+ */
+
+// Load Dolibarr environment
+if (false === (@include '../../main.inc.php')) {  // From htdocs directory
+    require '../../../main.inc.php'; // From "custom" directory
+}
+
+global $langs, $user;
+
+// Libraries
+require_once DOL_DOCUMENT_ROOT . "/core/lib/admin.lib.php";
+require_once '../lib/mymodule.lib.php';
+require_once '../lib/fonoapi.lib.php';
+require_once "../class/productphone.class.php";
+// Translations
+$langs->load("productphone@productphone");
+
+// Access control SI UTILISATEUR N'EST PAS ADMIN, ALORS NE PAS AUTORISER L'ACCES
+if (! $user->admin) {
+	accessforbidden();
+}
+
+// Parameters
+$p_brand = GETPOST('brand');
+$p_device = GETPOST('device');
+$p_announced = GETPOST('announced');
+$p_status = GETPOST('status');
+$p_os = GETPOST('os');
+$p_dimensions = GETPOST('dimensions');
+$p_action = GETPOST('action');
+/*
+ * ACTIONS
+ *
+ * Put here all code to do according to value of "action" parameter
+ */
+if($phone){
+    foreach($phone as $key=>$reponse){
+        $t_liste_phone_raw[] = (array)$reponse;
+    }
+}
+
+/**
+ * Recherche product_phone_raw
+ */
+if ($p_action == 'rechercher') {
+    //Permet de rechercher sur FonoApi
+    $_productPhone = new ProductPhone($db);
+    $t_rawdata = $_productPhone->get_raw_data($p_brand ,$p_device);
+
+    //Si déja dans llx_product_phone_raw, alors affiché la date d'importation
+    $_product_phone_tms = new ProductPhone($db);
+    $phone = $_product_phone_tms->get_productPhoneRaw();
+
+    //si aucune correspondance, alors afficher un méssage d'erreur
+    if (empty($t_rawdata)){
+        setEventMessage('Produit Introuvable','errors');}}
+
+/**
+ *Importe product_phone_raw
+ */
+if ($p_action == 'insert'){
+
+    //Insère en base de donnée
+    $_productPhone = new ProductPhone($db);
+    $_productPhone->feed_productPhone($p_brand,$p_device);
+    //Si déja dans llx_product_phone_raw, Alors affiché la date d'importation
+    $_product_phone_tms = new ProductPhone($db);
+    $phone = $_product_phone_tms->get_productPhoneRaw();
+    //Permet de rechercher sur FonoApi
+    $_productPhone = new ProductPhone($db);
+    $t_rawdata = $_productPhone->get_raw_data($p_brand ,$p_device);
+
+    
+}
+
+
+/*
+ * View
+ */
+$page_name = "Parametre Product Phone";
+llxHeader('', $langs->trans($page_name));
+/**
+ * subheader
+ */
+$linkback='<a href="'.DOL_URL_ROOT.'/admin/modules.php">'
+	. $langs->trans("retour liste Module") .'</a>';
+print load_fiche_titre($langs->trans($page_name), $linkback);
+// Configuration header
+$head = mymoduleAdminPrepareHead();
+dol_fiche_head(
+	$head,
+	'ficheproduit',
+	$langs->trans("Product-Phone"),
+	0,
+	"productphone@productphone"
+);
+// Setup page goes here
+echo $langs->trans("Recherche Produit");
+
+print '<h2>PRODUCT PHONE</h2>';
+
+print '<form action="import.php?action=rechercher&device="'.$p_device.'"&brand="'.$p_brand.'" method="GET">';
+print 'Marque : <input type="text" name="brand" value="'.$p_brand.'"/> <br>';
+print 'Modele : <input type="text" name="device" value="'.$p_device.'"/> ';
+print '<button type="submit" name="action" value="rechercher">Rechercher Produit</button>';
+print '<button name="action" value="insert">Importer</button>';
+print '</form>';
+
+if($t_rawdata || $p_action == 'insert') {
+    echo '<h2>Liste des Appareils</h2>';
+    echo '<table class="noborder">';
+    echo '<thead>';
+    echo '<tr class="liste_titre">';
+    echo '<th>TMS</th><th>Brand</th><th>Device Name</th><th>Announced</th>';
+    echo '<th>Status</th><th>Os</th><th>Dimensions</th>';
+    echo '</tr>';
+    echo '</thead>';
+    $parity = TRUE;
+//On affiche chaque entrée une a une
+        foreach ($t_rawdata as $key => $reponse) {
+            $parity = !$parity;
+            if (($item['DeviceName']) == ($reponse->DeviceName)) {
+                echo '<td >'.$item['tms'].'</td>';
+            } elseif ($item['DeviceName'] !== $reponse->DeviceName){
+                echo '<tr class="'.($parity?'pair':'impair').'"><td>';
+                //---------------------------------------------------
+                //si Brand-DeviceName ISSET
+                //ALORS
+                //afficher la date d'enregistrement
+                //---------------------------------------------------
+                if( isset($phone[ $reponse->Brand ][ $reponse->DeviceName ]) ){
+//-------------------------------------------------------------------
+                    echo $phone[ $reponse->Brand ][ $reponse->DeviceName ]['tms'];
+
+                } else {
+                    echo '-';
+                }
+                echo '</td>';
+            }
+        //Si Fiche produit llx_product_phone_raw déja importé, Alors affiché donnée fiche llx_product_phone_raw au lieux de FonoApi
+        if( isset($phone[ $reponse->Brand ][ $reponse->DeviceName ]) ){
+            print '<td>'.$phone[ $reponse->Brand ][ $reponse->DeviceName ]['Brand'].'</td>';
+            print '<td>'.$phone[ $reponse->Brand ][ $reponse->DeviceName ]['DeviceName'].'</td>';
+            print '<td>'.$phone[ $reponse->Brand ][ $reponse->DeviceName ]['announced'].'</td>';
+            print '<td>'.$phone[ $reponse->Brand ][ $reponse->DeviceName ]['status'].'</td>';
+            print '<td>'.$phone[ $reponse->Brand ][ $reponse->DeviceName ]['os'].'</td>';
+            print '<td>'.$phone[ $reponse->Brand ][ $reponse->DeviceName ]['dimensions'].'</td>';
+        }else{
+//Si fiche produit jamais importé, Alors affiché les donnée de FonoApi
+//--------------------------------------------------------------------
+            //Brand
+            echo '<td>'.$reponse->Brand.'</td>';
+//--------------------------------------------------------------------
+            //DeviceName
+            echo '<td>'.$reponse->DeviceName.'</td>';
+//--------------------------------------------------------------------
+            //Annouced
+            echo '<td>'.$reponse->announced.'</td>';
+//--------------------------------------------------------------------
+            //Status
+            echo '<td>'.$reponse->status.'</td>';
+//--------------------------------------------------------------------
+            //OS
+            echo '<td>'.$reponse->os.'</td>';
+//--------------------------------------------------------------------
+            //APN
+            echo '<td>'.$reponse->dimensions.'</td>';
+//--------------------------------------------------------------------
+            echo '</tr>';
+            echo '<form>';
+        }
+    }
+    echo '</table>';
+}
+// Page end
+dol_fiche_end();
+llxFooter();

@@ -1,0 +1,228 @@
+# <one line to give the program's name and a brief idea of what it does.>
+# Copyright (C) <year>  <name of author>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+#
+#   Configuration du module
+#
+Module750504Name=Product Phone
+Module750504Desc=Rechercher les caractéristiques de téléphone pour l'associer à un produit Vodafone afin de créer un catalogue
+ProductPhone=Product Phone
+
+#
+# Page de configuration
+#
+ProductPhoneSetup= Configuration du module
+ManagementCards= Gestion des fiches
+ImportingCard= Importation des fiches
+ProductPhoneToken= Clé API
+BackToModuleList= Retour liste des modules
+
+#
+# Page fiche produit + onglet
+#
+Productfiche=Fiche produit
+Productficheraw=Produit associer
+
+
+#
+# Page À propos
+#
+About=À propos
+ProductPhoneAbout=À propos du module Product Phone
+ProductPhoneAboutPage=Page à propos du module Product Phone
+
+#
+# Page Fiche produit
+#
+Productfiche= Fiche produit
+Productficheraw= Produit associer
+
+# Permissions
+ProductPhoneReadPermission=Consulter les produits
+
+# ONGLET PRODUCT PHONE - IMPORTATION DES FICHES
+productPhoneTms=Tms
+productPhoneBrand=Marque
+productPhoneDeviceName=Modèle
+productPhoneListOfDevices=Liste des appareils
+productPhoneAnnounced=Annoncé
+productPhoneStatus=Statut
+productPhoneOs=Os
+productPhoneDimensions=Dimensions
+
+
+ClassifyInCategory=Classer dans la catégorie
+
+# ONGLET
+
+#
+# ACTIONS
+#
+productPhoneSearch= rechercher
+productPhoneImporting= importer
+
+#
+# ALERTES
+#
+SuccessImportingProductPhone= Produit(s) correctement importé(s)
+ErrorSearchProductPhone= Produit introuvable
+
+
+#
+# Page d'administration
+#
+MyModuleSetup = Configuration du module mon module
+Settings = Réglages
+MyModuleSetupPage = Page de réglage de mon module
+
+#
+# Page À propos
+#
+About = À propos
+MyModuleAbout = À propos de mon module
+MyModuleAboutPage = Page à propos de mon module
+
+#
+# Page Fiche détails
+#
+productphone_detailsSheet= Fiche détails
+productphone_reference= Référence
+productphone_wording= Libellé
+productphone_listOfRelatedProducts= Liste des produits associés
+productphone_brandAndDeviceName= Marque et Modèle
+productphone_specificationsDevice= Caractéristiques de l'appareil
+
+#
+# Page Importation des fiches
+#
+ImportingCards = Importation des fiches
+ProductPhoneStatistical = Satistiques des importations
+SearchImportingProductPhone= Recherche et importation des produits
+productphone_statistics= Statistiques
+productphone_devicesImporting= Produits importés
+productphone_brandsImporting= Dont Marques importés
+
+#
+# Page Catalogue
+#
+productPhoneListing= Liste des appareils
+productPhoneSearching= Rechercher
+productPhoneCriteriaToRefineSearch= Affiner votre recherche
+
+#
+# Page d'exemple
+#
+MyPageName = Nom de ma page
+
+#
+# Box d'exemple
+#
+productphone_rowid = Fk_product_phone_raw
+productphone_DeviceName= Modèle
+productphone_Brand= Marque
+productphone_technology= Technologie
+productphone_gprs= Gprs
+productphone_edge= Edge
+productphone_announced= Annoncé
+productphone_status= Statut
+productphone_dimensions=Dimensions
+productphone_weight=Poids
+productphone_sim= Sim
+productphone_type= Type
+productphone_resolution=Résolution
+productphone_display_c= Caractéristique écrans
+productphone_card_slot= Fente pour carte mémoire
+productphone_phonebook= Annuaire
+productphone_call_records= Enregistrement d'appel
+productphone_camera_c= Caractéristique caméra
+productphone_alert_types= Type d'alerte
+productphone_loudspeaker_= Haut-parleur
+productphone_sound_c= Caractéristique du sons
+productphone_wlan= Wifi
+productphone_bluetooth= Bluetooth
+productphone_gps= Puce GPS
+productphone_radio= Radio
+productphone_messaging= Messagerie
+productphone_clock= Heure
+productphone_alarm= Alarme
+productphone_games= Jeux
+productphone_languages= Langues
+productphone_java= Java
+productphone_features_c = Info
+productphone_battery_c= Caractéristique batterie
+productphone_colors= Couleurs
+productphone__2g_bands= Bandes 2G
+productphone__3_5mm_jack_= Prise jack 3,5mm
+productphone_stand_by= Mis en veille
+productphone_talk_time= Temps de conversation
+productphone_infrared_port= Port infrarouge
+productphone_sar_us= Das en amérique
+productphone_sar_eu= Das en europe
+productphone_browser= Navigateur
+productphone_memory_c= Caractéristique mémoire
+productphone_sensors= Capteurs
+productphone_cpu= Processeurs
+productphone_internal= Mémoire vive
+productphone_size= Taille
+productphone_os= Système d'exploitation
+productphone_keyboard= Clavier physique
+productphone_primary_= Appareil photo principal
+productphone_video= Capture video
+productphone_secondary= Appareil photo avant
+productphone_usb= Type usb
+productphone_chipset= Marque processeur
+productphone_network_c= Caractéristique internet
+productphone_body_c= Caractéristique de l'appareil
+productphone_speed= Vitesse transmition de donnée internet
+productphone__3g_bands= Bandes 3G
+productphone_features= Fonctionnalité
+productphone_loudspeaker= Haut-parleur
+productphone_audio_quality= Qualiter audio
+productphone_protection= Protection
+productphone_music_play= Lecture musique
+productphone_camera= Caméra
+productphone_gpu= Puce graphique
+productphone_multitouch= Multi-touches
+productphone__4g_bands= Bandes 4G
+productphone_display= Calorimetrie
+productphone_nfc= Nfc
+productphone_performance= Performance
+productphone_build= Matériaux de construction
+productphone_price= Prix
+productphone_sar= Das
+productphone_tms= Heure/Dates enregistrement produit dans la base de donnée
+productphone_fk_user= Id de l'utilisateur
+productphone_os_name= Nom du système d'exploitation
+productphone_os_version= Version du système d'exploitation
+productphone_os_version_name= Nom de la version du système d'exploitation
+productphone_screen_resolution= Résolution de l'écrans
+productphone_phone_size= Taille du téléphone
+productphone_phone_weight= Poids
+productphone_primary_camera_resolution= Résolution caméra arrière
+productphone_secondary_camera_resolution= Résolution caméra avant
+productphone_cpu_number= Nombre de Cpu
+productphone_cpu_speed= Vitesse du Cpu
+productphone_ram= Mémoire Ram
+productphone_interne_memory= Mémoire interne
+productphone_connexion_type= Type de connexsion
+productphone_battery_capacity= Capacité de la batterie
+productphone_phone_color= Couleur
+productphone_sim1_format= Format sim 1
+productphone_sim2_format= Format sim 2
+productphone_dual_sim= Double Sim
+productphone_fk_product_phone_raw= Id produit brut
+
+
